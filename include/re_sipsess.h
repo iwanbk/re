@@ -33,7 +33,7 @@ int  sipsess_connect(struct sipsess **sessp, struct sipsess_sock *sock,
 		     sipsess_offer_h *offerh, sipsess_answer_h *answerh,
 		     sipsess_progr_h *progrh, sipsess_estab_h *estabh,
 		     sipsess_info_h *infoh, sipsess_refer_h *referh,
-		     sipsess_close_h *closeh, void *arg, const char *fmt, ...);
+		     sipsess_close_h *closeh, void *arg, const char *extra_hdrs, const char *fmt, ...);
 
 int  sipsess_accept(struct sipsess **sessp, struct sipsess_sock *sock,
 		    const struct sip_msg *msg, uint16_t scode,

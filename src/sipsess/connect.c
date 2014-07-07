@@ -185,7 +185,7 @@ int sipsess_connect(struct sipsess **sessp, struct sipsess_sock *sock,
 		    sipsess_offer_h *offerh, sipsess_answer_h *answerh,
 		    sipsess_progr_h *progrh, sipsess_estab_h *estabh,
 		    sipsess_info_h *infoh, sipsess_refer_h *referh,
-		    sipsess_close_h *closeh, void *arg, const char *fmt, ...)
+		    sipsess_close_h *closeh, void *arg, const char *extra_hdrs, const char *fmt, ...)
 {
 	struct sipsess *sess;
 	int err;
@@ -200,7 +200,18 @@ int sipsess_connect(struct sipsess **sessp, struct sipsess_sock *sock,
 		return err;
 
 	/* Custom SIP headers */
-	if (fmt) {
+    if (extra_hdrs) {
+        sess->hdrs = mbuf_alloc(256);
+		if (!sess->hdrs) {
+			err = ENOMEM;
+			goto out;
+		}
+        err = mbuf_write_str(sess->hdrs, extra_hdrs);
+		sess->hdrs->pos = 0;
+        if (err)
+            goto out;
+
+    } else if (fmt) {
 		va_list ap;
 
 		sess->hdrs = mbuf_alloc(256);
@@ -217,7 +228,6 @@ int sipsess_connect(struct sipsess **sessp, struct sipsess_sock *sock,
 		if (err)
 			goto out;
 	}
-
 	sess->owner = true;
 
 	err = sip_dialog_alloc(&sess->dlg, to_uri, to_uri, from_name,
