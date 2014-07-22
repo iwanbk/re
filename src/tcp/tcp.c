@@ -28,7 +28,9 @@
 #include <re_sa.h>
 #include <re_net.h>
 #include <re_tcp.h>
-
+#include <CoreFoundation/CoreFoundation.h>
+#include <CFNetwork/CFNetwork.h>
+#include <CoreFoundation/CFString.h>
 
 #define DEBUG_MODULE "tcp"
 #define DEBUG_LEVEL 5
@@ -616,6 +618,18 @@ int tcp_sock_alloc(struct tcp_sock **tsp, const struct sa *local,
 			err = errno;
 			continue;
 		}
+
+        CFReadStreamRef readStream;
+        CFStreamCreatePairWithSocket(kCFAllocatorDefault, fd,
+                                     &readStream, NULL);
+        if (!readStream) {
+            DEBUG_WARNING("create read stream failed\n");
+        }
+
+        if (CFReadStreamSetProperty(readStream, kCFStreamNetworkServiceType,
+                kCFStreamNetworkServiceTypeVoIP)!= TRUE) {
+            DEBUG_WARNING("CFReadStreamSetProperty failed\n");
+        }
 
 		(void)net_sockopt_reuse_set(fd, true);
 
