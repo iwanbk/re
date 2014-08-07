@@ -65,6 +65,7 @@ struct tcp_sock {
 	int fd;               /**< Listening file descriptor         */
 	int fdc;              /**< Cached connection file descriptor */
 	tcp_conn_h *connh;    /**< TCP Connect handler               */
+    CFReadStreamRef readStream;
 	void *arg;            /**< Handler argument                  */
 };
 
@@ -631,6 +632,10 @@ int tcp_sock_alloc(struct tcp_sock **tsp, const struct sa *local,
             DEBUG_WARNING("CFReadStreamSetProperty failed\n");
         }
 
+        if (CFReadStreamOpen(readStream) != TRUE) {
+            DEBUG_WARNING("CFReadStreamOpen failed\n");
+        }
+
 		(void)net_sockopt_reuse_set(fd, true);
 
 		err = net_sockopt_blocking_set(fd, false);
@@ -644,6 +649,7 @@ int tcp_sock_alloc(struct tcp_sock **tsp, const struct sa *local,
 
 		/* OK */
 		ts->fd = fd;
+		ts->readStream = readStream;
 		err = 0;
 		break;
 	}
